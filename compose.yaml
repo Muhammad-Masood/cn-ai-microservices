@@ -1,0 +1,69 @@
+name: "todo-app"
+version: '3'
+
+services:
+  api:
+    build:
+      context: ./todo-app
+      dockerfile: Dockerfile
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    env_file:
+      - ./todo-app/.env
+    networks:
+      - api-network
+    expose:
+      - ${SERVER_PORT}
+    
+  ai-api:
+    build:
+      context: ./recommendation-ai
+      dockerfile: Dockerfile
+    expose:
+      - ${AI_SERVER_PORT}
+    ports:
+      - ${AI_SERVER_PORT}:${AI_SERVER_PORT}
+    networks:
+      - api-network
+  
+  frontend:
+    build:
+      context: ./todo-poetry-ui
+      dockerfile: Dockerfile
+    ports:
+      - ${NEXT_PUBLIC_CLIENT_PORT}:${NEXT_PUBLIC_CLIENT_PORT}
+    depends_on:
+      - api
+      - ai-api
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL_DOCKER=${NEXT_PUBLIC_API_BASE_URL_DOCKER}
+      - NEXT_PUBLIC_API_BASE_URL_CLIENT=${NEXT_PUBLIC_API_BASE_URL_CLIENT}
+    networks:
+      - api-network
+    expose:
+      - ${NEXT_PUBLIC_CLIENT_PORT}
+  
+  # broker:
+  #   image: apache/kafka:3.7.0
+  #   container_name: broker
+  #   ports:
+  #     - ${BROKER_PORT}:${BROKER_PORT}
+  #   environment:
+  #     KAFKA_NODE_ID: 1
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+  #     KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT_HOST://localhost:9092,PLAINTEXT://broker:19092'
+  #     KAFKA_PROCESS_ROLES: 'broker,controller'
+  #     KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
+  #     KAFKA_LISTENERS: 'CONTROLLER://:29093,PLAINTEXT_HOST://:9092,PLAINTEXT://:19092'
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+  #     KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+  #     CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #     KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+  
+networks:
+  api-network:
+    driver: bridge
