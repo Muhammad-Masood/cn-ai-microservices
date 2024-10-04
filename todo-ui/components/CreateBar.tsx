@@ -15,7 +15,6 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import getConfig from "next/config";
 
 const formSchema = z.object({
   title: z

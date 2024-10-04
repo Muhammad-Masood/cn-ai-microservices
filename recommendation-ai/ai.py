@@ -4,10 +4,11 @@ from pytypes import Todo
 import json
 from groq import Groq
 
-_:bool = load_dotenv()
+# _:bool = load_dotenv()
 
 client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY"),
+    # api_key=os.environ.get("GROQ_API_KEY"),
+    api_key="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",
 )
 
 def recommendSimilarTasks(task: str) -> list[str]:
@@ -26,7 +27,6 @@ def recommendSimilarTasks(task: str) -> list[str]:
     )
     content = chat_completion.choices[0].message.content
     todos: list[Todo] = json.loads(content).get("similar_todos", [])
-    print("From AI: ", todos)
     return todos
 
 # recommendSimilarTasks("make a todo app")

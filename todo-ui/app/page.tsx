@@ -5,10 +5,6 @@ import { Todo } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  // const res = await fetch(
-  //   `${process.env.NEXT_PUBLIC_API_BASE_URL_DOCKER}/todos`
-  // );
-  // const todos: Todo[] = await res.json();
   const todos: Todo[] = await getTodos();
   console.log(todos);
   return (
