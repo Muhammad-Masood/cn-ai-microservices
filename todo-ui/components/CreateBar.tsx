@@ -57,7 +57,11 @@ const CreateBar = () => {
     try {
       console.log(todo);
       // Produce data for broker
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL_CLIENT}/todo/post`, todo);
+      // await produceTodoRecomData(todo.title);
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL_CLIENT}/todo/create_and_produce`,
+        todo
+      );
       router.refresh();
     } catch (error) {
       console.log("TODO-ERROR", error);

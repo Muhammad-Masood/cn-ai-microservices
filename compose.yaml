@@ -2,54 +2,58 @@ name: "todo-app"
 version: '3.8'
 
 services:
-  # api:
-  #   build:
-  #     context: ./todo-app
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - ${SERVER_PORT}:${SERVER_PORT}
-  #   env_file:
-  #     - ./todo-app/.env
-  #   networks:
-  #     - api-network
-  #   expose:
-  #     - ${SERVER_PORT}
-  
-  # ai-api:
-  #   build:
-  #     context: ./recommendation-ai
-  #     dockerfile: Dockerfile
-  #   expose:
-  #     - ${AI_SERVER_PORT}
-  #   ports:
-  #     - ${AI_SERVER_PORT}:${AI_SERVER_PORT}
-  #   volumes:
-  #     - ./recommendation-ai:/app
-  #   networks:
-  #     - api-network
-  #   depends_on:
-  #     - broker
-  
-  frontend:
+  api:
     build:
-      context: ./todo-ui
+      context: ./todo-app
       dockerfile: Dockerfile
     ports:
-      - ${NEXT_PUBLIC_CLIENT_PORT}:${NEXT_PUBLIC_CLIENT_PORT}
-    depends_on:
-      # - api
-      # - ai-api
-      - broker
-    environment:
-      - NEXT_PUBLIC_API_BASE_URL_DOCKER=${NEXT_PUBLIC_API_BASE_URL_DOCKER}
-      - NEXT_PUBLIC_API_BASE_URL_CLIENT=${NEXT_PUBLIC_API_BASE_URL_CLIENT}
-    volumes:
-      - ./todo-ui:/app
+      - ${SERVER_PORT}:${SERVER_PORT}
+    env_file:
+      - ./todo-app/.env
     networks:
       - api-network
+    volumes:
+      - ./todo-app:/app
     expose:
-      - ${NEXT_PUBLIC_CLIENT_PORT}
-  
+      - ${SERVER_PORT}
+    depends_on:
+      - broker
+
+  ai-api:
+    build:
+      context: ./recommendation-ai
+      dockerfile: Dockerfile
+    expose:
+      - ${AI_SERVER_PORT}
+    ports:
+      - ${AI_SERVER_PORT}:${AI_SERVER_PORT}
+    volumes:
+      - ./recommendation-ai:/app
+    networks:
+      - api-network
+    depends_on:
+      - broker
+
+  # frontend:
+  #   build:
+  #     context: ./todo-ui
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - ${NEXT_PUBLIC_CLIENT_PORT}:${NEXT_PUBLIC_CLIENT_PORT}
+  #   depends_on:
+  #     - api
+  #     - ai-api
+  #     - broker
+  #   environment:
+  #     - NEXT_PUBLIC_API_BASE_URL_DOCKER=${NEXT_PUBLIC_API_BASE_URL_DOCKER}
+  #     - NEXT_PUBLIC_API_BASE_URL_CLIENT=${NEXT_PUBLIC_API_BASE_URL_CLIENT}
+  #   # volumes:
+  #   #   - ./todo-ui:/app
+  #   networks:
+  #     - api-network
+  #   expose:
+  #     - ${NEXT_PUBLIC_CLIENT_PORT}
+
   broker:
     image: apache/kafka:3.7.0
     hostname: broker
@@ -74,7 +78,6 @@ services:
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
     networks:
       - api-network
-
   # kafka-ui:
   #   image: provectuslabs/kafka-ui
   #   container_name: kafka-ui
@@ -86,7 +89,7 @@ services:
   #     DYNAMIC_CONFIG_ENABLED: "true"
   #   depends_on:
   #     - broker    
-  
+
 networks:
   api-network:
     driver: bridge

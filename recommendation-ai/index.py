@@ -10,41 +10,44 @@ import asyncio
 import json
 from ai import recommendSimilarTasks
 
-async def consume_messages(topic, bootstrap_servers):
+loop = asyncio.get_event_loop()
+kafka_broker='broker:19092'
+
+# Consume data from client
+async def consume_messages(topic: str, bootstrap_servers):
     # Create a consumer instance.
     consumer = AIOKafkaConsumer(
         topic,
         bootstrap_servers=bootstrap_servers,
         group_id="todo-recom-group",
-        auto_offset_reset='earliest'
+        auto_offset_reset='earliest',
+        loop=loop
     )
 
     # Start the consumer.
     await consumer.start()
     try:
-        # Continuously listen for messages.
-        async for message in consumer:
-            print(f"Received message: {message.value.decode()} on topic {message.topic}")
-            # Here you can add code to process each message.
-            # Example: parse the message, store it in a database, etc.
+         async for message in consumer:
+            todo_title = message.value.decode()
+            print("consumed in ai service: ", todo_title)
+            recom_tasks = await recommend_todos(Todo(title=todo_title, status=False))
+            # await produce_recom_tasks_list(recom_tasks) 
     finally:
-        # Ensure to close the consumer when done.
         await consumer.stop()
 
 # Kafka Producer as a dependency
-async def get_kafka_producer():
-    producer = AIOKafkaProducer(bootstrap_servers='broker:19092', client_id='todo-app')
-    # producer = AIOKafkaProducer(bootstrap_servers='localhost:19092', client_id='todo-app')
-    await producer.start()
-    try:
-        yield producer
-    finally:
-        await producer.stop()
+# async def get_kafka_producer():
+    # producer = AIOKafkaProducer(bootstrap_servers='broker:19092')
+    # await producer.start()
+    # try:
+    #     yield producer
+    # finally:
+    #     await producer.stop()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI)-> AsyncGenerator[None, None]:
-    task = asyncio.create_task(consume_messages('todos-recom-topic', 'broker:19092'))
-    # task = asyncio.create_task(consume_messages('todos-recom-topic', 'localhost:19092'))
+    print("Starting consumer...")
+    asyncio.create_task(consume_messages('todo-topic', kafka_broker))
     yield
 
 app = FastAPI(lifespan=lifespan, title="Recommendation System AI")
@@ -53,23 +56,25 @@ app = FastAPI(lifespan=lifespan, title="Recommendation System AI")
 def main():
     return 'Todo Recommendation AI'
 
-
+# Produce data to kafka
 @app.post("/recommendtodos/")
-async def recommend_todos(todo: Todo, producer: Annotated[AIOKafkaProducer, Depends(get_kafka_producer)]):
+async def recommend_todos(todo: Todo):
         try:
             task = todo.title
             tasks: list[str] = recommendSimilarTasks(task)
             tasks = [t for t in tasks if t!=task]
-            todos: list[Todo] = [Todo(title=task) for task in tasks]
-            # todos_filtered = [{field: getattr(todo, field) for field in todo.model_dump()} for todo in todos]
-            # print("todos_filtered -> ",todos_filtered)
-            # tasks_serialized = [json.dumps(t).encode("utf-8") for t in tasks]
-            todos_data_ser = json.dumps({"todos":tasks}).encode("utf-8")
-            print(todos)
-            await producer.send_and_wait("todos-recom-topic", todos_data_ser)
-            return todos
-            # return "todos"
+            await produce_recom_tasks_list(tasks)
+            return tasks
         except Exception as e:
             print(e)
             return {"error": str(e)}
-        
+
+async def produce_recom_tasks_list(recom_tasks: list[str]):
+    try:
+        producer = AIOKafkaProducer(bootstrap_servers=kafka_broker)
+        await producer.start()
+        todos_data_ser = json.dumps({"todos":recom_tasks}).encode("utf-8")
+        print(recom_tasks)
+        await producer.send_and_wait("todos-recom-topic", todos_data_ser)
+    finally:
+        await producer.stop()
