@@ -17,3 +17,8 @@ export type Todo = {
 export type ConsumedDataTodo = {
   todos: string[];
 };
+
+export type EventModel = {
+  type: string;
+  message: ConsumedDataTodo;
+};

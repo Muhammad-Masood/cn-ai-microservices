@@ -19,7 +19,7 @@ async def consume_messages(topic: str, bootstrap_servers):
     consumer = AIOKafkaConsumer(
         topic,
         bootstrap_servers=bootstrap_servers,
-        group_id="todo-recom-group",
+        group_id="todo-recom-group-2",
         auto_offset_reset='earliest',
         loop=loop
     )

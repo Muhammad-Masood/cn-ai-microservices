@@ -88,7 +88,7 @@ const CreateBar = () => {
                     placeholder="Enter task"
                     {...field}
                     autoFocus
-                    className={"w-[325px]"}
+                    // className={"w-[325px]"}
                   />
                 </FormControl>
               </FormItem>

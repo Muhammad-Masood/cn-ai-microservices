@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class EventModel(BaseModel):
     type: str
-    message: str
+    message: list[str]
 
 class SSEEvent:
     Events = deque()

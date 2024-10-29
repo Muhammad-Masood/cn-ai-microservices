@@ -26,6 +26,8 @@ export default async function Home() {
 
   return (
     <>
+    <div className="">
+      <p className="font-semibold text-2xl text-center pt-[2.5rem]">Smart Todo App</p>
       <div className="flex flex-col md:flex-row lg:flex-row items-center justify-evenly h-screen">
         <div className="w-full sm:w-[70%] md:w-[35%] h-[500px] shadow-lg rounded-lg border ">
           <div className="flex p-5 w-full h-full flex-col justify-between items-center">
@@ -39,6 +41,7 @@ export default async function Home() {
         </div>
         <RecommendedTodos consumedTodos={consumedTodos} />
       </div>
+    </div>
     </>
   );
 }
