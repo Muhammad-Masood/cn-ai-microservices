@@ -11,19 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const todos: Todo[] = await getTodos();
   let consumedTodos: string[] = [];
-  // const data = await consumeTodoRecommendations();
-  // console.log("consume data received -> ", data);
-  // const response = await fetch("http://localhost:3000/api/consumer");
-  // const data = await response.json();
-  // const consumedTodos = data.consumedTodos;
-
-  // websocket
-  // const socket = io();
-  // socket.on("consumed_todos", (data) => {
-  //   console.log("received_data ->", data);
-  // });
-  // console.log("consumed_todos_page -> ", consumedTodos, data);
-
+ 
   return (
     <>
     <div className="">

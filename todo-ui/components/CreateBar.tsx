@@ -56,8 +56,6 @@ const CreateBar = () => {
     setLoading(true);
     try {
       console.log(todo);
-      // Produce data for broker
-      // await produceTodoRecomData(todo.title);
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_BASE_URL_CLIENT}/todo/create_and_produce`,
         todo
