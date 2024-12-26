@@ -8,7 +8,7 @@ from groq import Groq
 
 client = Groq(
     # api_key=os.environ.get("GROQ_API_KEY"),
-    api_key="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",
+    api_key="******************************",
 )
 
 def recommendSimilarTasks(task: str) -> list[str]:
